@@ -37,6 +37,7 @@ def search_member():
 
     search_text = search_text.lower()
     skip = 0
+    all_matches = []
 
     while True:
         data = call_api(skip)
@@ -44,27 +45,30 @@ def search_member():
         if not data:
             return jsonify({"error": "API error"}), 500
 
-        # ✅ Correct key
         members = data.get("Results", [])
 
-        # 🔚 No more data
         if not members:
-            return jsonify({"message": "No match found"})
+            break  # ✅ No more data
 
-        # 🔍 Search logic
         for member in members:
             name = member.get("Name", "").lower()
 
-            if search_text in name:
-                return jsonify({
-                    "message": "Match found",
-                    "data": member,
-                    "skip_used": skip
-                })
+            # 👉 Example: active filter
+            status = member.get("MembershipStatus", "").lower()
 
-        # 🔁 Next batch
+            if search_text in name or search_text in status:
+                all_matches.append(member)
+
         skip += 200
 
+    if not all_matches:
+        return jsonify({"message": "No match found"})
+
+    return jsonify({
+        "message": "Matches found",
+        "count": len(all_matches),
+        "data": all_matches
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
