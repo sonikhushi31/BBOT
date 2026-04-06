@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 API_URL = "https://burnabyboardoftrade.growthzoneapp.com/api/memberships/all"
-API_KEY = "A1Y8akSXMjWhCUtRvEwCALwoyOaaLLUhdwHouCWy"  # 🔴 Replace with your key
+API_KEY = "A1Y8akSXMjWhCUtRvEwCALwoyOaaLLUhdwHouCWy"
 
 
 def call_api(skip, top=200):
@@ -37,7 +37,7 @@ def search_member():
 
     search_text = search_text.lower()
     skip = 0
-    all_matches = []
+    all_matches = []   # ✅ collect all
 
     while True:
         data = call_api(skip)
@@ -48,14 +48,13 @@ def search_member():
         members = data.get("Results", [])
 
         if not members:
-            break  # ✅ No more data
+            break   # ✅ stop loop
 
         for member in members:
             name = member.get("Name", "").lower()
+            status = member.get("Status", "").lower()
 
-            # 👉 Example: active filter
-            status = member.get("MembershipStatus", "").lower()
-
+            # ✅ search in both name & status
             if search_text in name or search_text in status:
                 all_matches.append(member)
 
@@ -67,9 +66,9 @@ def search_member():
     return jsonify({
         "message": "Matches found",
         "count": len(all_matches),
-        "data": all_matches
+        "data": all_matches   # ✅ LIST
     })
-
+    
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
